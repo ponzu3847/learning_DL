@@ -90,9 +90,15 @@ class BaseModel:
             print(self.loss_layer.__class__.__name__+':勾配にnanが含まれます')
         for layer in reversed(self.layers):
             dout = layer.backward(dout)
-            if self.weight_decay=='ridge':
+            if self.weight_decay=='lasso':
                 if isinstance(layer,(Affine,Convolution)):
-                    layer.grads[0]+=layer.params[0]
+                    layer.grads[0]+=self.weight_decay_lambda
+                elif isinstance(layer,ConvResNet):
+                    pass #未実装
+                
+            elif self.weight_decay=='ridge':
+                if isinstance(layer,(Affine,Convolution)):
+                    layer.grads[0]+=self.weight_decay_lambda*layer.params[0]
                 elif isinstance(layer,ConvResNet):
                     pass #未実装
 
