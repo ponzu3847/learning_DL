@@ -333,7 +333,7 @@ class ConvResNet:
     def forward(self,x,train_flg=True):
         self.x=x
         for layer in self.layers:
-            if isinstance(layer,(BatchNormalization,ConvResNet)):
+            if isinstance(layer,(BatchNormalization,ConvResNet,Dropout)):
                 x=layer.forward(x,train_flg)
             else:
                 x=layer.forward(x)
