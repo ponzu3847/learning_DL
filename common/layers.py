@@ -502,4 +502,23 @@ class Repeat:
         dout=dout.reshape(N,C,H*W)
         dout=dout.sum(axis=2)
         return dout
+
+
+class Dropout:
+    def __init__(self,input_shape,param_list):
+        self.params,self.grads=[],[]
+        self.output_shape=input_shape
+        self.dropout_rate=param_list[0]
+        self.mask=None
+
+    def forward(self,x,train_flg):
+        if train_flg:
+            self.mask=np.random.rand(*x.shape)>self.dropout_rate
+            return x*self.mask
+        else:
+            return x*(1.0-self.dropout_rate)
+
+    def backward(self,dout):
+        return dout*self.mask
+
         
