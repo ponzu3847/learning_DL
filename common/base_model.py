@@ -32,7 +32,7 @@ class BaseModel:
 
     def predict(self, x, train_flg=False):
         for layer in self.layers:
-            if isinstance(layer, (BatchNormalization,ConvResNet)):
+            if isinstance(layer, (BatchNormalization,ConvResNet,Dropout)):
                 x = layer.forward(x, train_flg)
                 isnan=np.isnan(x)
                 if np.count_nonzero(isnan)!=0:
