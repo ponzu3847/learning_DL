@@ -6,7 +6,7 @@ layer_dict={
             'relu':Relu,'sigmoid':Sigmoid, 'tanh':Tanh,
             'conv':Convolution,'deconv':Deconvolution,'pool':Pooling,'affine':Affine,
             'batchnorm':BatchNormalization,'gap':GAP,
-            'convres':ConvResNet,'repeat':Repeat,'dropout':Dropout
+            'convres':ConvResNet,'repeat':Repeat,'dropout':Dropout,'flatten':Flatten
         }
         
 loss_layer_dict={
