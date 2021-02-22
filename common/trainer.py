@@ -1,7 +1,7 @@
 # coding: utf-8
 import sys
 sys.path.append('..')
-from common.config import GPU
+from common import config
 import numpy
 import time
 import matplotlib.pyplot as plt
@@ -106,18 +106,23 @@ class Trainer:
         plt.show()
         
     def save_loss(self):
-        loss_list=[self.loss_list]
+        train_loss_list=self.loss_list.copy()
         if GPU:
-            loss_list=[to_cpu(l) for l in loss_list]
+            train_loss_list=[to_cpu(p) for p in train_loss_list]
+
+        loss_list=[train_loss_list]
             
         with open(self.file_name+'_loss.pkl','wb') as f:
             pickle.dump(loss_list,f)
             
     def save_acc(self):
-        acc_list=[self.train_acc_list,self.test_acc_list]
+        train_acc_list=self.train_acc_list.copy()
+        test_acc_list=self.test_acc_list.copy()
         if GPU:
-            acc_list=[to_cpu(l) for l in acc_list]
+            train_acc_list=[to_cpu(p) for p in train_acc_list]
+            test_acc_list=[to_cpu(p) for p in test_acc_list]
             
+        acc_list=[train_acc_list,test_acc_list]
         with open(self.file_name+'_acc.pkl','wb') as f:
             pickle.dump(acc_list,f) 
 
