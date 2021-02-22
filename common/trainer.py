@@ -108,7 +108,7 @@ class Trainer:
     def save_loss(self):
         loss_list=[self.loss_list]
         if GPU:
-            loss_list=to_cpu(loss_list)
+            loss_list=[to_cpu(l) for l in loss_list]
             
         with open(self.file_name+'_loss.pkl','wb') as f:
             pickle.dump(loss_list,f)
@@ -116,7 +116,7 @@ class Trainer:
     def save_acc(self):
         acc_list=[self.train_acc_list,self.test_acc_list]
         if GPU:
-            acc_list=to_cpu(acc_list)
+            acc_list=[to_cpu(l) for l in acc_list]
             
         with open(self.file_name+'_acc.pkl','wb') as f:
             pickle.dump(acc_list,f) 
