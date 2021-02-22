@@ -343,7 +343,7 @@ class ConvResNet:
         else:
             N,FN,out_h,out_w=x.shape
             N,C,H,W=self.x.shape
-            if self.W is None:
+            if self.W is None:  #1*1 Convolutionでチャンネル数を合わせるための重み
                 self.W=np.random.randn(FN,C).astype('f')
                 self.params+=[self.W]
                 self.grads+=[np.zeros_like(self.W).astype('f')]
@@ -391,7 +391,7 @@ class Flatten:
         
     def forward(self,x):
         self.original_shape=x.shape
-        x=reshape(x.shape[0],-1)
+        x=x.reshape(x.shape[0],-1)
         return x
         
     def backward(self,dout):
