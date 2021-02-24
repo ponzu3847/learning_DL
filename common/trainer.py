@@ -21,7 +21,10 @@ class Trainer:
         self.test_acc_list = []
         self.file_name=file_name
         
-    def fit(self, x, t, max_epoch=10, batch_size=32, max_grad=None, eval_interval=20,eval_accuracy=False,eval_sample_num=None,x_test=None,t_test=None):
+    def fit(self, x, t, x_test=None,t_test=None,
+            max_epoch=10, batch_size=32, max_grad=None, 
+            eval_interval=20,eval_accuracy=False,eval_sample_num=None,
+            show_generate=False,generate_params=None):
         data_size = len(x)
         max_iters = data_size // batch_size
         self.eval_interval = eval_interval
@@ -83,6 +86,9 @@ class Trainer:
                 self.save_loss()
                 if eval_accuracy:
                     self.save_acc()
+            
+            if show_generate:
+                self.model.show_generate(*generate_params)
                 
             self.current_epoch += 1
         
