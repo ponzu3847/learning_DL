@@ -45,7 +45,7 @@ class Affine:
         
         '''
         node_num,weight_init_std=param_list
-        W=np.random.randn(input_shape[0],node_num)*np.sqrt(weight_init_std/node_num).astype('f')
+        W=np.random.randn(input_shape[0],node_num)*np.sqrt(weight_init_std/input_shape[0]).astype('f')
         b=np.zeros(node_num).astype('f')
         self.params=[W,b]
         self.grads=[np.zeros_like(W).astype('f'),np.zeros_like(b).astype('f')]
@@ -397,7 +397,8 @@ class Flatten:
     def backward(self,dout):
         dout=dout.reshape(*self.original_shape)
         return dout
-        
+
+
 class Deconvolution:
     def __init__(self,input_shape,param_list):
         '''
@@ -521,4 +522,15 @@ class Dropout:
     def backward(self,dout):
         return dout*self.mask
 
-        
+
+class ToImage:
+    def __init__(self,input_shape,param_list):
+        self.params,self.grads=[],[]
+        self.H,self.W=param_list
+        self.output_shape=(1,self.H,self.W)
+
+    def forward(self,x):
+        return x.reshape(x.shape[0],1,self.H,self.W)
+
+    def backward(self,dout):
+        return dout.reshape(dout.shape[0],-1)
