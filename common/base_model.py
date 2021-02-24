@@ -53,37 +53,35 @@ class BaseModel:
 
     def forward(self, x, t):
         y = self.predict(x, train_flg=True)
-        if self.weight_decay=='lasso':
-            weight_decay=0
-            for layer in self.layers:
-                if isinstance(layer,(Affine,Convolution)):
-                    W=layer.params[0]
-                    weight_decay+=self.weight_decay_lambda*np.sum(np.abs(W))
-                elif isinstance(layer,ConvResNet):
-                    pass    #未実装
-                else:
-                    continue
-            loss=self.loss_layer.forward(y,t)+weight_decay
-                    
-        elif self.weight_decay=='ridge':
-            weight_decay=0
-            for layer in self.layers:
-                if isinstance(layer,(Affine,Convolution)):
-                    W=layer.params[0]
-                    weight_decay+=0.5*self.weight_decay_lambda*np.sum(W**2)
-                elif isinstance(layer,ConvResNet):
-                    pass    #未実装
-                else:
-                    continue
-            loss=self.loss_layer.forward(y,t)+weight_decay
-            
-        else:
-            loss=self.loss_layer.forward(y, t)
+        if self.loss_layer is not None:
+            if self.weight_decay=='lasso':
+                weight_decay=0
+                for layer in self.layers:
+                    if isinstance(layer,(Affine,Convolution)):
+                        W=layer.params[0]
+                        weight_decay+=self.weight_decay_lambda*np.sum(np.abs(W))
+                    elif isinstance(layer,ConvResNet):
+                        pass    #未実装
+                    else:
+                        continue
+                y=self.loss_layer.forward(y,t)+weight_decay
+                        
+            elif self.weight_decay=='ridge':
+                weight_decay=0
+                for layer in self.layers:
+                    if isinstance(layer,(Affine,Convolution)):
+                        W=layer.params[0]
+                        weight_decay+=0.5*self.weight_decay_lambda*np.sum(W**2)
+                    elif isinstance(layer,ConvResNet):
+                        pass    #未実装
+                    else:
+                        continue
+                y=self.loss_layer.forward(y,t)+weight_decay
+                
+            else:
+                y=self.loss_layer.forward(y, t)
         
-        isnan=np.isnan(loss)
-        if isnan:
-            print('lossがnanです')
-        return loss
+        return y
         
     def backward(self,dout=1):
         dout = self.loss_layer.backward(dout)
