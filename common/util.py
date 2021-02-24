@@ -128,11 +128,8 @@ def clip_grads(grads, max_norm):
             
 
 def show_distribution(x):
-    if x.ndim!=2:
-        x=x.reshape(x.shape[0],-1)
-        
-    x=x[0]  #バッチの１つ目
     x=to_cpu(x)
+    x=x.ravel()
     plt.hist(x)
     plt.show()
     
