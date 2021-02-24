@@ -1,16 +1,19 @@
+from common import config
+from common.np import *
 from common.base_model import BaseModel
 from common import layer_dictionary
 from common.util import to_cpu,to_gpu
 import matplotlib.pyplot as plt
 
 class AutoEncoder(BaseModel):
-    def __init__(self,input_shape,enc_layer_list,dec_layer_list,loss_layer,show_distribution=False):
+    def __init__(self,input_shape,enc_layer_list,dec_layer_list,loss_layer,weight_decay=None,weight_decay_lambda=0,show_distribution=False):
         loss_layer_dict=layer_dictionary.loss_layer_dict
         
         self.encoder=BaseModel(input_shape,enc_layer_list,loss_layer=None,show_distribution=show_distribution)
         self.decoder=BaseModel(self.encoder.layers[-1].output_shape,dec_layer_list,loss_layer=None,show_distribution=show_distribution)
         self.loss_layer=loss_layer_dict[loss_layer]()
-        
+
+        self.layers=[]
         self.layers=self.encoder.layers+self.decoder.layers
         
         self.params,self.grads=[],[]
@@ -18,8 +21,10 @@ class AutoEncoder(BaseModel):
             self.params+=layer.params
             self.grads+=layer.grads
             
+        self.weight_decay=weight_decay
+        self.weight_decay_lambda=weight_decay_lambda
         self.show_distribution=show_distribution
-        
+
         
     def generate(self,x,original_img_shape):
         train_flg=False
@@ -67,4 +72,5 @@ class AutoEncoder(BaseModel):
                     z=to_cpu(z)
                 ax[i][j].imshow(z)
                 ax[i][j].axis('off')
-        fig.show()
+
+        plt.show()
