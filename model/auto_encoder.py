@@ -1,13 +1,12 @@
 from common import config
 from common.np import *
 from common.base_model import BaseModel
-from common import layer_dictionary
+from common.layer_dictionary import *
 from common.util import to_cpu,to_gpu
 import matplotlib.pyplot as plt
 
 class AutoEncoder(BaseModel):
     def __init__(self,input_shape,enc_layer_list,dec_layer_list,loss_layer,weight_decay=None,weight_decay_lambda=0,show_distribution=False):
-        loss_layer_dict=layer_dictionary.loss_layer_dict
         
         self.encoder=BaseModel(input_shape,enc_layer_list,loss_layer=None,show_distribution=show_distribution)
         self.decoder=BaseModel(self.encoder.layers[-1].output_shape,dec_layer_list,loss_layer=None,show_distribution=show_distribution)

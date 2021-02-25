@@ -84,10 +84,11 @@ class BaseModel:
         return y
         
     def backward(self,dout=1):
-        dout = self.loss_layer.backward(dout)
-        isnan=np.isnan(dout)
-        if np.count_nonzero(isnan)!=0:
-            print(self.loss_layer.__class__.__name__+':勾配にnanが含まれます')
+        if self.loss_layer is not None:
+            dout = self.loss_layer.backward(dout)
+            isnan=np.isnan(dout)
+            if np.count_nonzero(isnan)!=0:
+                print(self.loss_layer.__class__.__name__+':勾配にnanが含まれます')
         for layer in reversed(self.layers):
             dout = layer.backward(dout)
             if self.weight_decay=='lasso':
