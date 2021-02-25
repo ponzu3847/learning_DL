@@ -50,7 +50,7 @@ class Affine:
         self.params=[W,b]
         self.grads=[np.zeros_like(W).astype('f'),np.zeros_like(b).astype('f')]
         self.x=None
-        self.output_shape=(node_num,)
+        self.output_shape=[node_num]
 
     def forward(self,x):
         W,b=self.params
@@ -163,7 +163,7 @@ class GAP:
         self.cache=None
         self.params,self.grads=[],[]
         C,H,W=input_shape
-        self.output_shape=(C,)
+        self.output_shape=[C]
 
     def forward(self,x):
         N,C,H,W=x.shape
@@ -221,7 +221,7 @@ class Convolution:
 
         self.out_h=(H+2*self.pad-FH)//self.stride+1
         self.out_w=(W+2*self.pad-FW)//self.stride+1
-        self.output_shape=(FN,self.out_h,self.out_w)
+        self.output_shape=[FN,self.out_h,self.out_w]
         
     def forward(self,x):
         self.original_shape=x.shape
@@ -267,7 +267,7 @@ class Pooling:
         C,H,W=input_shape
         self.out_h = 1 + (H +2*self.pad - self.pool_h) // self.stride
         self.out_w = 1 + (W +2*self.pad - self.pool_w) // self.stride
-        self.output_shape=(C,self.out_h,self.out_w)
+        self.output_shape=[C,self.out_h,self.out_w]
 
     def forward(self, x):
         self.original_shape = x.shape
@@ -385,7 +385,7 @@ class ConvResNet:
 class Flatten:
     def __init__(self,input_shape,param_list=[]):
         C,H,W=input_shape
-        self.output_shape=(C*H*W,)
+        self.output_shape=[C*H*W]
         self.original_shape=None
         self.params,self.grads=[],[]
         
@@ -423,7 +423,7 @@ class Deconvolution:
 
         self.out_h=(padded_h-FH)//self.stride+1
         self.out_w=(padded_w-FW)//self.stride+1
-        self.output_shape=(FN,self.out_h,self.out_w)
+        self.output_shape=[FN,self.out_h,self.out_w]
         self.mask=None
         self.original_shape=None
 
@@ -487,7 +487,7 @@ class Repeat:
         '''
         self.H,self.W=param_list
         C,=input_shape
-        self.output_shape=(C,self.H,self.W)
+        self.output_shape=[C,self.H,self.W]
         self.params,self.grads=[],[]
         
     def forward(self,x):
@@ -527,7 +527,7 @@ class ToImage:
     def __init__(self,input_shape,param_list):
         self.params,self.grads=[],[]
         self.H,self.W=param_list
-        self.output_shape=(1,self.H,self.W)
+        self.output_shape=[1,self.H,self.W]
 
     def forward(self,x):
         return x.reshape(x.shape[0],1,self.H,self.W)
