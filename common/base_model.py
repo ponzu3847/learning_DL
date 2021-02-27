@@ -122,7 +122,7 @@ class BaseModel:
 
         return acc / x.shape[0]
 
-    def save_params(self,file_name='DeepConvnet.pkl'):
+    def save_params(self,file_name):
         params = [p.astype(np.float16) for p in self.params]
 
         if GPU:
@@ -131,7 +131,7 @@ class BaseModel:
         with open(file_name,'wb') as f:
             pickle.dump(params,f)
 
-    def load_params(self,file_name='DeepConvnet.pkl'):
+    def load_params(self,file_name):
         with open(file_name,'rb') as f:
             params=pickle.load(f)
 
@@ -141,3 +141,32 @@ class BaseModel:
 
         for i, param in enumerate(self.params):
             param[...] = params[i]
+
+    def save_bn_params(self,file_name):
+        bn_params=[]
+        for layer in self.layers:
+            if isinstance(layer,BatchNormalization):
+                params=[layer.running_mean,layer.running_var]
+                params=[p.astype(np.float16) for p in params]
+                bn_params.append(params)
+        if GPU:
+            bn_params=[to_cpu(p) for p in bn_params]
+
+        with open(file_name+'_bn.pkl','wb') as f:
+            pickle.dump(bn_params,f)
+
+    def load_bn_params(self,file_name):
+        with open(file_name,'rb') as f:
+            bn_params=pickle.load(f)
+
+        bn_params = [p.astype('f') for p in bn_params]
+        if GPU:
+            bn_params = [to_gpu(p) for p in bn_params]
+
+        i=0
+        for layer in self.layers:
+            if isinstance(layer,BatchNormalization):
+                layer.running_mean=bn_params[i][0]
+                layer.running_var=bn_params[i][1]
+                i+=1
+            
