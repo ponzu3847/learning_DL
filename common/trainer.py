@@ -2,6 +2,7 @@
 import sys
 sys.path.append('..')
 from common import config
+from common.layers import BatchNormalization
 import numpy
 import time
 import matplotlib.pyplot as plt
@@ -86,6 +87,15 @@ class Trainer:
                 self.save_loss()
                 if eval_accuracy:
                     self.save_acc()
+
+                use_batchnorm=False
+                for layer in self.model.layers:
+                    if isinstance(layer,BatchNormalization):
+                        use_batchnorm=True
+                        break
+                
+                if use_batchnorm:
+                    self.model.save_bn_params(self.file_name)
             
             if show_generate:
                 self.model.show_generate(*generate_params)
