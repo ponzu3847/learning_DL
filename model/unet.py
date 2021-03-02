@@ -95,12 +95,20 @@ class Unet(BaseModel):
         self.conv4x_shape=conv4_x.shape
         x=self.pool4.forward(x)
         x=self.conv_bottom.predict(x,train_flg)
+
+        conv4_x=self.crop_image(conv4_x,x)
         x=np.concatenate([x,conv4_x],axis=1)
         x=self.conv4_out.predict(x,train_flg)
+
+        conv3_x=self.crop_image(conv3_x,x)
         x=np.concatenate([x,conv3_x],axis=1)
         x=self.conv3_out.predict(x,train_flg)
+
+        conv2_x=self.crop_image(conv2_x,x)
         x=np.concatenate([x,conv2_x],axis=1)
         x=self.conv2_out.predict(x,train_flg)
+
+        conv1_x=self.crop_image(conv1_x,x)
         x=np.concatenate([x,conv1_x],axis=1)
         x=self.conv1_out.predict(x,train_flg)
 
@@ -109,6 +117,7 @@ class Unet(BaseModel):
 
     def forward(self,x,t):
         x=self.predict(x=x,train_flg=True)
+        t=self.crop_image(t,x)
         loss=self.loss_layer.forward(x=x,t=t)
 
         return loss
@@ -117,18 +126,31 @@ class Unet(BaseModel):
     def backward(self,dout=1):
         dout=self.loss_layer.backward(dout)
         dout=self.conv1_out.backward(dout)
-        dx1=dout[:,:self.conv1x_shape[1],:,:]
-        conv1_dx=dout[:,self.conv1x_shape[1]:,:,:]
+
+        # dx1=dout[:,:self.conv1x_shape[1],:,:]
+        # conv1_dx=dout[:,self.conv1x_shape[1]:,:,:]
+
+        dx1,conv1_dx=self.split_pad(dout,self.conv1x_shape)
         dout=self.conv2_out.backward(dx1)
-        dx2=dout[:,:self.conv2x_shape[1],:,:]
-        conv2_dx=dout[:,self.conv2x_shape[1]:,:,:]
+
+        # dx2=dout[:,:self.conv2x_shape[1],:,:]
+        # conv2_dx=dout[:,self.conv2x_shape[1]:,:,:]
+
+        dx2,conv2_dx=self.split_pad(dout,self.conv2x_shape)
         dout=self.conv3_out.backward(dx2)
-        dx3=dout[:,:self.conv3x_shape[1],:,:]
-        conv3_dx=dout[:,self.conv3x_shape[1]:,:,:]
+
+        # dx3=dout[:,:self.conv3x_shape[1],:,:]
+        # conv3_dx=dout[:,self.conv3x_shape[1]:,:,:]
+
+        dx3,conv3_dx=self.split_pad(dout,self.conv3x_shape)
         dout=self.conv4_out.backward(dx3)
-        dx4=dout[:,:self.conv4x_shape[1],:,:]
-        conv4_dx=dout[:,self.conv4x_shape[1]:,:,:]
+
+        # dx4=dout[:,:self.conv4x_shape[1],:,:]
+        # conv4_dx=dout[:,self.conv4x_shape[1]:,:,:]
+
+        dx4,conv4_dx=self.split_pad(dout,self.conv4x_shape)
         dout=self.conv_bottom.backward(dx4)
+
         dout=self.pool4.backward(dout)
         dout+=conv4_dx
         dout=self.conv4_in.backward(dout)
@@ -143,6 +165,33 @@ class Unet(BaseModel):
         dout=self.conv1_in.backward(dout)
 
         return dout
+
+    
+    def crop_image(self,x,x_out):
+        N,C,H,W=x.shape
+        N,out_c,out_h,out_w=x_out.shape
+        q_h,mod_h=divmod(H-out_h,2)
+        q_w,mod_w=divmod(W-out_w,2)
+        x=x[:,:,q_h:-(q_h+mod_h),q_w:-(q_w+mod_w)]
+        return x
+
+
+    def split_pad(self,dout,x_shape):
+        N,C,H,W=x_shape
+        N,out_c,out_h,out_w=dout.shape
+        #split
+        dx1=dout[:,:out_c-C,:,:]
+        dx2=dout[:,out_c-C:,:,:]
+        #pad
+        q_h,mod_h=divmod(H-out_h,2)
+        q_w,mod_w=divmod(W-out_w,2)
+        dx2=np.pad(dx2,[(0,0),(0,0),(q_h,q_h+mod_h),(q_w,q_w+mod_w)])
+        return dx1,dx2
+        
+
+
+
+
 
 
 
